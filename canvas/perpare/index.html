@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1.0,user-scalable=no">
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta charset="utf-8">
+    <title></title>
+    <style type="text/css">
+        body {padding: 20px 0 0 20px;}
+        .page canvas {display: inline-block;margin: 0 10px 10px 0; border: 1px solid #ddd;}
+        .box {margin: 0; padding: 0; font-size: 0;}
+        .clip-box {font-size: 0;}
+        .clip-box .item {display: inline-block; margin: 10px 10px 0 0;}
+        .clip-box canvas {display: block; margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+
+<div class="page">
+
+</div>
+<div class="clip-box">
+
+</div>
+
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="./js/createDpiCanvas.js"></script>
+<script src="./js/pageInit.js"></script>
+<script src="./js/handle.js"></script>
+<script>
+    (function () {
+        page.init();
+        main();
+
+        function main() {
+            var $clipBox = $(".clip-box");
+            // 获取边界
+            // 填充到另一个canvas中
+            // 转换成图片
+
+            $(".page").find("canvas").each(function (i, item) {
+                var canvas = $(item).get(0);
+                var ctx = canvas.getContext("2d");
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var range = boundary.init(imageData);
+                //ctx.fillStyle = "rgba(0,0,255, .7)";
+                //ctx.fillRect(range.l, range.t, range.w, range.h);
+                ctx.strokeStyle = "rgba(255,0,0, .5)";
+                ctx.lineWidth = 1;
+                //ctx.strokeRect(range.l, range.t, range.w, range.h);
+
+                var imgData = ctx.getImageData(range.l, range.t, range.w, range.h);
+                var c = document.createElement("canvas");
+                c.width = imgData.width;
+                c.height = imgData.height;
+                c.getContext("2d").putImageData(imgData, 0, 0);
+
+                var img = document.createElement("img");
+                img.src = c.toDataURL("image/png");
+
+                $clipBox.append($("<div class='item'></div>").append(c).append(img))
+            });
+        }
+    })();
+</script>
+</body>
+</html>
