@@ -8,15 +8,39 @@
     <meta charset="utf-8">
     <title></title>
     <style type="text/css">
-        body {padding: 20px 0 0 20px;}
-        .page canvas {display: inline-block;margin: 0 10px 10px 0; border: 1px solid #ddd;}
-        .box {margin: 0; padding: 0; font-size: 0;}
-        .clip-box {font-size: 0;}
-        .clip-box .item {display: inline-block; margin: 10px 10px 0 0;}
-        .clip-box canvas {display: block; margin-bottom: 5px;}
+        body { padding: 20px 0 0 20px; }
+        .target { font-size: 0; }
+        .target > div { display: inline-block; margin-right: 20px; }
+        .page canvas { display: inline-block; margin: 0 10px 10px 0; border: 1px solid #ddd; }
+        .box { margin: 0; padding: 0; font-size: 0; }
+        .clip-box { font-size: 0; }
+        .clip-box .item { display: inline-block; margin: 10px 15px 0 0; }
+        .clip-box canvas { display: inline-block; vertical-align: top; margin-right: 5px; }
+        .clip-box img { display: inline-block; vertical-align: top; }
+        table { font-size: 14px; background-color: #eee; }
+        td { padding: 2px; background-color: #fff; }
+        h6 { margin: 0; font-size: 12px; font-weight: normal; padding: 10px 0 2px; }
     </style>
 </head>
 <body>
+
+<div class="target">
+    <div>
+        <img src="../../source/digital/1.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/digital/2.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/digital/3.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/digital/7.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/digital/8.png" alt="">
+    </div>
+</div>
 
 <div class="page">
 
@@ -25,43 +49,136 @@
 
 </div>
 
+
 <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
-<script src="./js/createDpiCanvas.js"></script>
-<script src="./js/pageInit.js"></script>
-<script src="./js/handle.js"></script>
+<script src="./js/tools.js"></script>
+<script src="./js/original.js"></script>
 <script>
     (function () {
-        page.init();
-        main();
+        var $tar = $(".target");
+        var tarArr = [];
+        $tar.find("img").each(function (i, item) {
+            tarArr.push(trans2Canvas($(item)));
+        });
+        tarArr.forEach(function (singleArr, i) {
+            compare(singleArr, i);  // 单个字母的数据
+        });
 
-        function main() {
-            var $clipBox = $(".clip-box");
-            // 获取边界
-            // 填充到另一个canvas中
-            // 转换成图片
+        function compare(singleArr, i) {
+            var oriMap = window.charRatio;
+            for (var key in oriMap) {
+                compareSingle(singleArr, oriMap[key], key, i);
+            }
+        }
 
-            $(".page").find("canvas").each(function (i, item) {
-                var canvas = $(item).get(0);
-                var ctx = canvas.getContext("2d");
-                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                var range = boundary.init(imageData);
-                //ctx.fillStyle = "rgba(0,0,255, .7)";
-                //ctx.fillRect(range.l, range.t, range.w, range.h);
-                ctx.strokeStyle = "rgba(255,0,0, .5)";
-                ctx.lineWidth = 1;
-                //ctx.strokeRect(range.l, range.t, range.w, range.h);
+        function compareSingle(tar, ori, key, tarIdx) {
+            var col = tar[0].length;
+            var row = tar.length;
 
-                var imgData = ctx.getImageData(range.l, range.t, range.w, range.h);
-                var c = document.createElement("canvas");
-                c.width = imgData.width;
-                c.height = imgData.height;
-                c.getContext("2d").putImageData(imgData, 0, 0);
-
-                var img = document.createElement("img");
-                img.src = c.toDataURL("image/png");
-
-                $clipBox.append($("<div class='item'></div>").append(c).append(img))
+            var error = {
+                key: key,
+                tarIdx: tarIdx,
+                single: [],
+                hor: [],
+                ver: [],
+            }; // 误差
+            // 1.挨个值比较
+            tar.forEach(function (rows, i) {
+                error.single[i] = [];
+                rows.forEach(function (val, j) {
+                    var oriRR = ori[i][j].rr;
+                    error.single[i][j] = val.rr - oriRR;
+                    //console.log(key, val.rr, oriRR, val.rr- oriRR);
+                });
             });
+            // 2.水平竖直比较
+            var sum = 0;
+            for (var i = 0; i < row; i++) {
+                for (var j = 0; j < col; j++) {
+                    var val = tar[i][j].rr;
+                    var val1 = ori[i][j].rr;
+                    sum += val - val1;
+                }
+                error.hor.push(sum);
+            }
+            /*for (i = 0; i < row; i++) {
+                error.ver[i] = [];
+                for (j = 0; j < col; j++) {
+                    error.ver[i][j] = [];
+                }
+            }
+            for (i = 0; i < col; i++) {
+                for (j = 0; j < row; j++) {
+                    val = tar[j][i].rr;
+                    val1 = ori[j][i].rr;
+                    error.ver[j][i] = val - val1;
+                }
+            }*/
+            sum = 0;
+            for (i = 0; i < col; i++) {
+                for (j = 0; j < row; j++) {
+                    val = tar[j][i].rr;
+                    val1 = ori[j][i].rr;
+                    sum += val - val1;
+                }
+                error.ver.push(sum);
+            }
+
+            // 3. 对角
+            // pass
+
+            // 对误差进行测算
+            var result = {key: key, tarIdx: tarIdx, single: 0, ver: 0, hor: 0};
+            error.single.forEach(function (arr, i) {
+                arr.forEach(function (num, j) {
+                    //console.log(result.single, num);
+                    result.single += num;
+                });
+            });
+            error.hor.forEach(function (num, i) {
+                result.hor += num;
+            });
+            error.ver.forEach(function (num, i) {
+                result.ver += num;
+            });
+
+
+            //console.log(error);
+            console.log(result);
+            //console.log(key, tarIdx, result.single + result.ver + result.hor);
+        }
+
+        function trans2Canvas($img) {
+            var $box = $img.parent();
+            var w = $img.width();
+            var h = $img.height();
+            var canvas = tools.createHiDPICanvas(w, h);
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage($img.get(0), 0, 0, canvas.width, canvas.height);
+            $box.append(canvas);
+
+            var tarCans = tools.cutCanvasByBorder(canvas);
+            $box.append(tarCans);
+            return renderRatio(tarCans);
+        }
+
+        function renderRatio(canvas) {
+            var ctx = canvas.getContext("2d");
+            var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var ratio = tools.getRatio(imgData, {cols: 3, rows: 4});
+
+            var str1 = '<h6>有效值/总有效值</h6><table cellpadding="1" cellspacing="1">';
+            ratio.forEach(function (arr, i) {
+                str1 += '<tr>';
+                arr.forEach(function (item, j) {
+                    str1 += '<td>' + (item.rr * 100).toFixed(2) + '</td>'
+                });
+                str1 += '</tr>';
+            });
+            str1 += '</table>';
+
+            $(canvas).parent().append(str1);
+            return ratio;
         }
     })();
 </script>
