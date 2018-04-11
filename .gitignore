@@ -33,7 +33,7 @@ Thumbs.db
 .ipr
 .iws
 .settings/
-.idea/
+.idea/                   
 .svn/
 .sass-cache/
 
@@ -43,3 +43,4 @@ venv/
 
 npm-debug.log
 config.json
+vcs.xml
