@@ -2,7 +2,7 @@
 # coding=utf-8
 import sys, re
 from PIL import Image
-import sys,os
+import sys, os
 
 import pyocr
 import pyocr.builders
@@ -12,7 +12,6 @@ sys.setdefaultencoding('utf8')
 
 
 def main():
-
     tools = pyocr.get_available_tools()
     if len(tools) == 0:
         print("No OCR tool found")
@@ -27,7 +26,8 @@ def main():
     lang = langs[0]
     print("Will use lang '%s'" % (lang))
 
-    cur_path = os.path.abspath('../source/code2.png')
+    #cur_path = os.path.abspath('../source/char/8.png')
+    cur_path = os.path.abspath('../source/code1.png')
     cur_path = os.path.normpath(cur_path)
     print(cur_path)
 
@@ -36,11 +36,12 @@ def main():
         lang=lang,
         builder=pyocr.tesseract.DigitBuilder()
     )
-    print(digits)
+    print('__', digits, '__')
 
     '''
     code1.png   实际值：83271   输出值：33271
     code2.png   实际值：39652   输出值：39652
+    char/6_real_1  实际值：6        输出值：空
     '''
 
 

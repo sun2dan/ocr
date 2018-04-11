@@ -4,6 +4,8 @@
 (function () {// 页面初始化准备工作
     var codes = [[65, 90], [97, 122], [48, 57]];
     var createHiDPICanvas = tools.createHiDPICanvas;
+    var fontStyle = 'normal 50px Arial';
+    fontStyle = 'normal 50px Microsoft YaHei';
 
     window.page = {
         // 创建canvas列表
@@ -22,7 +24,7 @@
                     var ctx = can.getContext('2d');
                     ctx.fillStyle = "#fff";
                     ctx.fillRect(0, 0, can.width, can.height);
-                    ctx.font = 'normal 50px Arial';
+                    ctx.font = fontStyle;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillStyle = '#000';
@@ -36,17 +38,29 @@
 
         // 创建字符集
         createCharSet: function () {
+            // 大小写一致的只保留大写
+            var filterArr = ['c', 'o', 'p', 's', 'u', 'v', 'w', 'x', 'z'];
+
             var charArr = [[], [], []];
             codes.forEach(function (arr, index) {
                 for (var i = arr[0]; i <= arr[1]; i++) {
                     var c = String.fromCharCode(i);
-                    charArr[index].push(c);
+                    isFilter(c) && charArr[index].push(c);
                 }
             });
             this.charArr = charArr;
+
             //console.log(charArr);
+
+            function isFilter(code) {
+                for (var i = 0, len = filterArr.length; i < len; i++) {
+                    var c = filterArr[i];
+                    if (c === code) return false;
+                }
+                return true;
+            }
         },
-        
+
         init: function () {
             this.createCharSet();
             this.createCanvasList();
@@ -167,7 +181,8 @@
         function renderRatio(canvas) {
             var ctx = canvas.getContext("2d");
             var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            var ratio = tools.getRatio(imgData, {cols: 3, rows: 4});
+            var obj = tools.getRatio(imgData, tools.splitObj);
+            var ratio = obj.pieces;
 
             var str = '<h6>有效值/所在区域</h6><table>';
             var str1 = '<h6>有效值/总有效值</h6><table cellpadding="1" cellspacing="1">';
@@ -175,8 +190,8 @@
                 str += '<tr>';
                 str1 += '<tr>';
                 arr.forEach(function (item, j) {
-                    str += '<td>' + item.r .toFixed(2) + '</td>'
-                    str1 += '<td>' + item.rr .toFixed(2) + '</td>'
+                    str += '<td>' + item.r.toFixed(2) + '</td>';
+                    str1 += '<td>' + item.rr.toFixed(2) + '</td>';
                 });
                 str += '</tr>';
                 str1 += '</tr>';
@@ -185,7 +200,7 @@
             str1 += '</table>';
 
             $(canvas).parent().append(str1);
-            return ratio;
+            return obj;
         }
     }
 })();

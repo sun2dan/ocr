@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1.0,user-scalable=no">
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="./css/index.css"/>
+    <style type="text/css">
+    </style>
+</head>
+<body>
+
+<div class="target">
+    <div>
+        <img src="../../source/char/1.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/char/2.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/char/3.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/char/7.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/char/8.png" alt="">
+    </div>
+    <!--<div>
+        <img src="../../source/char/A_yh_n.png" alt="">
+    </div>-->
+    <div>
+        <img src="../../source/char/A_arial_n.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/char/a_arial_n_l.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/char/d_arial_n_l.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/char/s_real_1.png" alt="">
+    </div>
+    <div>
+        <img src="../../source/char/6_real_1.png" alt="">
+    </div>
+</div>
+
+<div class="page original">
+</div>
+<div class="clip-box original">
+</div>
+
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="./js/tools.js"></script>
+<script src="./js/original.js"></script>
+<script>
+    (function () {
+        // 取前几个比较接近的值
+        var topLen = 8;
+
+        var $tar = $(".target");
+        var result = [];
+        var compare = tools.compare;
+
+        $tar.find("img").each(function (idx, item) {
+            setTimeout(function () {
+                main(idx, item);
+            }, 1000)
+        });
+
+        function main(idx, item) {
+            var singleObj = trans2Canvas($(item));
+            var arr = compare(singleObj, idx);  // 单个字母的数据
+            arr.sort(function (a, b) {
+                return Math.abs(a.ratio) - Math.abs(b.ratio);
+            });
+            var res = [];
+            var strArr = [];
+            for (var i = 0; i < topLen; i++) {
+                res.push(arr[i].key);
+                strArr.push('<span>' + arr[i].key + '</span>');
+            }
+            result[idx] = res.join(",");
+            $(item).parent().append("<h4>" + strArr.join("") + "</h4>");
+            //console.log(result);
+        }
+
+
+        function trans2Canvas($img) {
+            var $box = $img.parent();
+            var w = $img.width();
+            var h = $img.height();
+            var canvas = tools.createHiDPICanvas(w, h);
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage($img.get(0), 0, 0, canvas.width, canvas.height);
+            $box.append(canvas);
+
+            var tarCans = tools.cutCanvasByBorder(canvas);
+            $box.append(tarCans);
+            return renderRatio(tarCans);
+        }
+
+        function renderRatio(canvas) {
+            var ctx = canvas.getContext("2d");
+            var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var obj = tools.getRatio(imgData, tools.splitObj);
+            var ratio = obj.pieces;
+
+            var str = '<h6>有效值/总有效值</h6><table cellpadding="1" cellspacing="1">';
+            ratio.forEach(function (arr, i) {
+                str += '<tr>';
+                arr.forEach(function (item, j) {
+                    str += '<td>' + item.rr.toFixed(2) + '</td>'
+                });
+                str += '</tr>';
+            });
+            str += '</table>';
+
+            $(canvas).parent().append(str);
+            return obj;
+        }
+    })();
+</script>
+</body>
+</html>

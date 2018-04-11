@@ -1,0 +1,61 @@
+body {
+  padding: 20px 0 0 20px; }
+  body .original {
+    visibility: hidden; }
+  body .box {
+    margin: 0;
+    padding: 0;
+    font-size: 0; }
+  body table {
+    font-size: 14px;
+    background-color: #eee; }
+  body td {
+    padding: 2px;
+    background-color: #fff; }
+  body h6 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: normal;
+    padding: 10px 0 2px; }
+
+.target {
+  font-size: 0; }
+  .target > div {
+    display: inline-block;
+    margin-right: 20px; }
+  .target h4 {
+    font-weight: normal; }
+    .target h4 span {
+      font-size: 12px;
+      margin-right: 3px;
+      vertical-align: baseline; }
+      .target h4 span:nth-of-type(1) {
+        font-size: 16px;
+        font-weight: bold;
+        color: #f00; }
+      .target h4 span:nth-of-type(2) {
+        font-size: 14px;
+        font-weight: bold; }
+      .target h4 span:nth-of-type(3) {
+        font-size: 13px;
+        font-weight: bold; }
+
+.page {
+  margin-top: 20px; }
+  .page canvas {
+    display: inline-block;
+    margin: 0 10px 10px 0;
+    border: 1px solid #ddd; }
+
+.clip-box {
+  font-size: 0; }
+  .clip-box .item {
+    display: inline-block;
+    margin: 10px 15px 0 0; }
+  .clip-box canvas {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 5px; }
+  .clip-box img {
+    display: inline-block;
+    vertical-align: top; }
